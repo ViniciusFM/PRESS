@@ -230,7 +230,8 @@ def search_string():
 
 def main():
     fetch_pdfs()
-    search_string()
+    threading.Thread(target=search_string).start()
+    print('lols')
     RESULT_GUI.mainloop()
 
 if __name__ == '__main__':
