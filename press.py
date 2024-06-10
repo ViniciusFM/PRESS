@@ -240,15 +240,6 @@ def search_string():
 
 # ------------ main
 
-class WaitWindow(tkinter.Toplevel):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.title("Please Wait")
-        self.geometry("200x100")
-        self.label = tkinter.Label(self, text="Please wait...")
-        self.label.pack(expand=True, padx=20, pady=20)
-        self.grab_set()
-
 class Setup(tkinter.Tk):
     def __init__(self):
         super().__init__()
