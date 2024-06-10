@@ -147,7 +147,7 @@ class ResultGUI(tkinter.Tk):
         self.progressf = tkinter.ttk.Frame(self)
         self.progressf.pack(fill='x')
         
-        self.labelProgressStatus = tkinter.Label(self, text=f'No PDFs found in: {ARGS.dirpath}')
+        self.labelProgressStatus = tkinter.Label(self, text=f'Initializing...')
         self.labelFoundStatus = tkinter.Label(self, text='Found 0')
         self.progressb = tkinter.ttk.Progressbar(self.progressf, 
                                                  orient='horizontal')
