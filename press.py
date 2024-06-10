@@ -272,7 +272,9 @@ class Setup(tkinter.Tk):
         self.icsChkVal.set(True)
         self.icsChk = tkinter.Checkbutton(self, text='Ignore Case Sensitive', variable=self.icsChkVal)
         self.icsChk.pack(side='left', pady=(0, 10), padx=10)
-        tkinter.Button(self, text='Search', command=self.onClickSearchButton).pack(side='right', padx=10, pady=(0, 10))
+        btn = tkinter.Button(self, text='Search', command=self.onClickSearchButton)
+        btn.pack(side='right', padx=10, pady=(0, 10))
+        self.bind('<Return>', lambda e: btn.invoke())
         
         # Treat when window closed
         self.protocol('WM_DELETE_WINDOW', self.onClosingWithoutSearch)
