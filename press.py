@@ -288,6 +288,7 @@ class Setup(tkinter.Tk):
         ARGS.dirpath = self.dirpath.get()
         ARGS.string = self.searchString.get()
         ARGS.ics = self.icsChkVal.get()
+        self.quit()
         self.destroy()
     def onClosingWithoutSearch(self):
         self.destroy()
