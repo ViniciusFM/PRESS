@@ -2,6 +2,8 @@ import argparse
 import concurrent.futures
 import mimetypes
 import os, sys, subprocess
+import tkinter.filedialog
+import tkinter.messagebox
 import tkinter.scrolledtext
 import tkinter.simpledialog
 import tkinter.ttk
@@ -17,13 +19,9 @@ VER     = '0.1'
 WIN_W   = 1024
 WIN_H   = 768
 
-#pypdf.errors.PdfStreamError
+# ------------ programatically instantiated
 
-'''reader = PdfReader("./fakerepo-ignore/chen2021.pdf")
-np = len(reader.pages)
-page = reader.pages[0]
-text = page.extract_text()'''
-
+RESULT_GUI = None
 
 # ------------ program arguments
 
@@ -51,11 +49,11 @@ def build_args():
     parser.add_argument('-v', action='store_true',
                         help='''Verbose. This option shows the program
                         status in text mode.''')
-    parser.add_argument('dirpath',
+    parser.add_argument('--dirpath',
                         help='''Define a path to the directory where the PDF
                                  files are.''',
                         type=dirpath)
-    parser.add_argument('string',
+    parser.add_argument('--string',
                         help='''A string regex for the search''',
                         type=str)
     return parser.parse_args()
@@ -77,6 +75,9 @@ def open_file(filename):
     else:
         opener = "open" if sys.platform == "darwin" else "xdg-open"
         subprocess.call([opener, filename])
+
+def isStrBlank(string):
+    return not (string and string.strip())
 
 # ------------ filepaths
 
@@ -158,6 +159,8 @@ class ResultGUI(tkinter.Tk):
         self.listbox.pack(fill='both', padx=10, pady=10)
         self.listbox.bind('<Double-Button>', self.onDoubleClickItemFromList)
         self.listbox.bind('<Button-3>', self.onRightClickItemFromList)
+        if not PDF_FILE_PATHS:
+            self.labelProgressStatus.config(text=f'No PDFs found in: {ARGS.dirpath}')
     def onRightClickItemFromList(self, _):
         sel = self.listbox.curselection()
         if sel:
@@ -186,8 +189,6 @@ class ResultGUI(tkinter.Tk):
                 self.labelFoundStatus.config(text=f'Found {len(self.__results)}')
                 self.listbox.insert(tkinter.END, f'{result.filePath}\
                                     {" (Failed) " if result.failed else ""}')
-
-RESULT_GUI = ResultGUI()
 
 # ------------ search
 
@@ -233,8 +234,74 @@ def search_string():
 
 # ------------ main
 
+class WaitWindow(tkinter.Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Please Wait")
+        self.geometry("200x100")
+        self.label = tkinter.Label(self, text="Please wait...")
+        self.label.pack(expand=True, padx=20, pady=20)
+        self.grab_set()
+
+class Setup(tkinter.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title(f'{APPNAME} v{VER}')
+        self.resizable(False, False)
+
+        # Open directory feature
+        self.dirpath = tkinter.StringVar()
+        dirframe = tkinter.Frame(self)
+        dirframe.pack(padx=10, pady=10, fill='x')
+        tkinter.Label(dirframe, text='Select a PDF repository').pack(fill='x')
+        self.dirpathEntry = tkinter.Entry(dirframe, width=50, textvariable=self.dirpath)
+        self.dirpathEntry.pack(side='left', padx=(0, 10))
+        self.dirpathEntry.configure(state='readonly')
+        tkinter.Button(dirframe, text='Open', command=self.onClickButtonOpenDirectory).pack(side='right')
+        
+        # Search string field
+        self.searchString = tkinter.StringVar()
+        ssframe = tkinter.Frame(self)
+        ssframe.pack(padx=10, pady=10, fill='x')
+        tkinter.Label(ssframe, text='Type a search string').pack(fill='x')
+        tkinter.Entry(ssframe, textvariable=self.searchString).pack(fill='x')
+        
+        # Ignore case sensitive option and Search button
+        self.icsChkVal = tkinter.BooleanVar()
+        self.icsChkVal.set(True)
+        self.icsChk = tkinter.Checkbutton(self, text='Ignore Case Sensitive', variable=self.icsChkVal)
+        self.icsChk.pack(side='left', pady=(0, 10), padx=10)
+        tkinter.Button(self, text='Search', command=self.onClickSearchButton).pack(side='right', padx=10, pady=(0, 10))
+        
+        # Treat when window closed
+        self.protocol('WM_DELETE_WINDOW', self.onClosingWithoutSearch)
+    def onClickButtonOpenDirectory(self):
+        d = tkinter.filedialog.askdirectory()
+        if d:
+            self.dirpath.set(d)
+    def onClickSearchButton(self):
+        if isStrBlank(self.dirpath.get()):
+            tkinter.messagebox.showerror(title='No directory selected',
+                                         message='Please select a PDF repository.')
+            return
+        if isStrBlank(self.searchString.get()):
+            tkinter.messagebox.showerror(title='No search string',
+                                         message='Please input a search string.')
+            return
+        
+        ARGS.dirpath = self.dirpath.get()
+        ARGS.string = self.searchString.get()
+        ARGS.ics = self.icsChkVal.get()
+        self.destroy()
+    def onClosingWithoutSearch(self):
+        sys.exit(1)
+
 def main():
+    global RESULT_GUI
+    if not ARGS.dirpath or not ARGS.string:
+        Setup().mainloop()
     fetch_pdfs()
+    RESULT_GUI = ResultGUI()
     threading.Thread(target=search_string).start()
     RESULT_GUI.mainloop()
 

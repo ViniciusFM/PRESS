@@ -5,10 +5,15 @@ PRESS is a **VERY** simple python software that search for strings inside PDF fi
 Just do:
 
 ```bash
-python3 press.py /path/to/pdf_repo/ "My Search Term"
+python3 press.py
 ```
 
-This is the simplest arguments you can use with PRESS. This will search all PDFs in `pdf_repo` that matches the string. The search will be *case sensitive*, each match will show a context of 100 characters surrounding it and running in 6 jobs (PDFs) at a time.
+<p align="center" width="100%">
+    <img src="./screenshots/ss00.png" width="80%"><br>
+    <b>Figure: <i>Setting repository and string search.</i></b>
+</p>
+
+This is the simplest arguments you can use with PRESS. By clicking on `search`, PRESS will search all PDFs in selected repository that matches the string. Each match will show a context of 100 characters surrounding it and running in 6 jobs (PDFs) at a time. You can configure the surrounding text and the jobs, take a look at [Usage](#usage).
 
 ## How to run?
 
@@ -64,28 +69,39 @@ python3 press.py -h
 You'll see this:
 
 ```
-usage: press.py [-h] [--ics] [--surc SURC] [--maxjobs MAXJOBS] [-v] dirpath string
+usage: press.py [-h] [--ics] [--surc SURC] [--maxjobs MAXJOBS] [-v] [--dirpath DIRPATH] [--string STRING]
 
 PRESS v0.1 - Pdf REpository String Search is a tool for mapping pdf files based in a string search
-
-positional arguments:
-  dirpath            Define a path to the directory where the PDF files are.
-  string             A string regex for the search
 
 options:
   -h, --help         show this help message and exit
   --ics              Ignore Case Sensitive search
-  --surc SURC        Surround context. The number of characteres surrounding the matching area. Shown on GUI when right button is pressed on the result. (Default: 100)
+  --surc SURC        Surround context. The number of characteres surrounding the matching area. Shown on GUI when right button is pressed on the
+                     result. (Default: 100)
   --maxjobs MAXJOBS  Maximum of threads running the search routines. Each thread will search in one PDF at time. (Default: 6)
   -v                 Verbose. This option shows the program status in text mode.
+  --dirpath DIRPATH  Define a path to the directory where the PDF files are.
+  --string STRING    A string regex for the search
 ```
 
-## Running a search for "floresta" example
+If you run without declaring `--dirpath` or `--string`, you'll be prompted with a GUI:
+
+```bash
+python3 press.py
+```
+
+<p align="center" width="100%">
+    <img src="./screenshots/ss00.png" width="80%"><br>
+    <b>Figure: <i>Setting repository and string search. Default maxjobs and surc</i></b>
+</p>
+
+
+## Running a search for "floresta" example using command line
 
 This example will use all flags as demonstration:
 
 ```bash
-python3 press.py /home/vinicius/livros/ "floresta" --ics --surc 150 --maxjobs 12 -v
+python3 press.py --dirpath /home/vinicius/livros/ --string "floresta" --ics --surc 150 --maxjobs 12 -v
 ```
 
 <p align="center" width="100%">
