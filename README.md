@@ -17,7 +17,7 @@ This is the simplest arguments you can use with PRESS. By clicking on `search`, 
 
 ## How to run?
 
-This app was developed using python 3. After the python installation, it is recomended that you create an execution virtual environment for the libraries used by this project. Use virtualenv for this. Install virtualenv package using pip an then create a virtual environment inside the PRESS repository directory. With an access to a terminal just type:
+This app was developed using **python 3.12.3**. After the python installation, it is recomended that you create an execution virtual environment for the libraries used by this project. Use virtualenv for this. Install virtualenv package using pip an then create a virtual environment inside the PRESS repository directory. With an access to a terminal just type:
 
 ```bash
 > pip install virtualenv     # virtualenv installation
