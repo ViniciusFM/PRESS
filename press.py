@@ -232,8 +232,7 @@ def pdf_search(fpath):
     RESULT_GUI.insertResult(Result(**result))
 
 def search_string():
-    global SEARCH_JOBS
-    while(not RESULT_GUI and not RESULT_GUI.isReady()): print('not ready')
+    while((not RESULT_GUI) or (not RESULT_GUI.isReady())): pass
     v_print('Dispatching search jobs...')
     with concurrent.futures.ThreadPoolExecutor(max_workers=ARGS.maxjobs) as executor:
         futures = [executor.submit(pdf_search, fpath) for fpath in PDF_FILE_PATHS]
