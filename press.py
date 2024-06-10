@@ -138,6 +138,8 @@ class ResultGUI(tkinter.Tk):
         self.title(f'{APPNAME} v{VER}')
         self.geometry(f'{WIN_W}x{WIN_H}')
         
+        self.__isResultGUIReady = False
+        
         self.__results = []
         self.__insertResultLock = threading.Lock()
         self.__scannedFiles = 0
@@ -145,7 +147,7 @@ class ResultGUI(tkinter.Tk):
         self.progressf = tkinter.ttk.Frame(self)
         self.progressf.pack(fill='x')
         
-        self.labelProgressStatus = tkinter.Label(self, text='Initializing...')
+        self.labelProgressStatus = tkinter.Label(self, text=f'No PDFs found in: {ARGS.dirpath}')
         self.labelFoundStatus = tkinter.Label(self, text='Found 0')
         self.progressb = tkinter.ttk.Progressbar(self.progressf, 
                                                  orient='horizontal')
@@ -159,8 +161,11 @@ class ResultGUI(tkinter.Tk):
         self.listbox.pack(fill='both', padx=10, pady=10)
         self.listbox.bind('<Double-Button>', self.onDoubleClickItemFromList)
         self.listbox.bind('<Button-3>', self.onRightClickItemFromList)
-        if not PDF_FILE_PATHS:
-            self.labelProgressStatus.config(text=f'No PDFs found in: {ARGS.dirpath}')
+        self.bind('<Map>', self.__setReady)
+    def __setReady(self, _):
+        self.__isResultGUIReady = True
+    def isReady(self):
+        return self.__isResultGUIReady
     def onRightClickItemFromList(self, _):
         sel = self.listbox.curselection()
         if sel:
@@ -228,6 +233,7 @@ def pdf_search(fpath):
 
 def search_string():
     global SEARCH_JOBS
+    while(not RESULT_GUI and not RESULT_GUI.isReady()): print('not ready')
     v_print('Dispatching search jobs...')
     with concurrent.futures.ThreadPoolExecutor(max_workers=ARGS.maxjobs) as executor:
         futures = [executor.submit(pdf_search, fpath) for fpath in PDF_FILE_PATHS]
@@ -294,6 +300,7 @@ class Setup(tkinter.Tk):
         ARGS.ics = self.icsChkVal.get()
         self.destroy()
     def onClosingWithoutSearch(self):
+        self.destroy()
         sys.exit(1)
 
 def main():
