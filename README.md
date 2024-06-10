@@ -100,3 +100,4 @@ If you select a result and right-click it, you'll see the pages where the search
     <b>Figure: <i>Matching contexts and page numbers.</i></b>
 </p>
 
+If you double click the result, PRESS will try to call the default PDF reader for the file path presented.
