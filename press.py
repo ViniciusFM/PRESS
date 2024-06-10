@@ -162,6 +162,8 @@ class ResultGUI(tkinter.Tk):
         self.listbox.bind('<Double-Button>', self.onDoubleClickItemFromList)
         self.listbox.bind('<Button-3>', self.onRightClickItemFromList)
         self.bind('<Map>', self.__setReady)
+        # Treat when window closed
+        self.protocol('WM_DELETE_WINDOW', self.onClosingWithoutSearch)
     def __setReady(self, _):
         self.__isResultGUIReady = True
     def isReady(self):
@@ -194,6 +196,9 @@ class ResultGUI(tkinter.Tk):
                 self.labelFoundStatus.config(text=f'Found {len(self.__results)}')
                 self.listbox.insert(tkinter.END, f'{result.filePath}\
                                     {" (Failed) " if result.failed else ""}')
+    def onClosingWithoutSearch(self):
+        self.destroy()
+        sys.exit()
 
 # ------------ search
 
@@ -289,7 +294,7 @@ class Setup(tkinter.Tk):
         ARGS.string = self.searchString.get()
         ARGS.ics = self.icsChkVal.get()
         self.quit()
-        self.destroy()
+        self.withdraw()
     def onClosingWithoutSearch(self):
         self.destroy()
         sys.exit(1)
