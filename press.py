@@ -1,11 +1,11 @@
 import argparse
+import concurrent.futures
 import mimetypes
 import os, sys, subprocess
 import tkinter.scrolledtext
 import tkinter.simpledialog
 import tkinter.ttk
 import pypdf
-import json
 import re
 import threading
 import tkinter
@@ -43,7 +43,11 @@ def build_args():
     parser.add_argument('--surc', 
                         help='''Surround context. The number of characteres surrounding
                         the matching area. Shown on GUI when right button is pressed
-                        on the result.''', type=int, default=100)
+                        on the result. (Default: 100)''', type=int, default=100)
+    parser.add_argument('--maxjobs', 
+                        help='''Maximum of threads running the search
+                        routines. Each thread will search in one PDF 
+                        at time. (Default: 6)''', type=int, default=6)
     parser.add_argument('-v', action='store_true',
                         help='''Verbose. This option shows the program
                         status in text mode.''')
@@ -168,7 +172,7 @@ class ResultGUI(tkinter.Tk):
                 open_file(result.filePath)
     def __incScannedFilesStatus(self):
         self.__scannedFiles += 1
-        status = f'Reading PDF #{self.__scannedFiles} out of {len(PDF_FILE_PATHS)}.'
+        status = f'Searching for \"{ARGS.string}\" PDF #{self.__scannedFiles} out of {len(PDF_FILE_PATHS)}.'
         v_print(status)
         self.labelProgressStatus.config(text=status)
         self.progressb['value'] = (self.__scannedFiles/len(PDF_FILE_PATHS))*100     
@@ -222,16 +226,16 @@ def pdf_search(fpath):
     RESULT_GUI.insertResult(Result(**result))
 
 def search_string():
-    v_print('Dispatch search...')
-    for fpath in PDF_FILE_PATHS:
-        pdf_search(fpath)
+    global SEARCH_JOBS
+    v_print('Dispatching search jobs...')
+    with concurrent.futures.ThreadPoolExecutor(max_workers=ARGS.maxjobs) as executor:
+        futures = [executor.submit(pdf_search, fpath) for fpath in PDF_FILE_PATHS]
 
 # ------------ main
 
 def main():
     fetch_pdfs()
     threading.Thread(target=search_string).start()
-    print('lols')
     RESULT_GUI.mainloop()
 
 if __name__ == '__main__':
